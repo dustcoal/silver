@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 #include "auth.h"
 #include "client.h"
 #include "config.h"
@@ -2699,11 +2700,21 @@ int main(int argc, char **argv) {
     sky_attrib.timer = glGetUniformLocation(program, "timer");
 
     // CHECK COMMAND LINE ARGUMENTS //
+    if (debug()) {
+		fprintf(stderr, "received arguments:\n");
+		for (int i = 0; i < argc; ++i) {
+			fprintf(stderr, "%d: `%s`\n", i, argv[i]);
+		}
+    }
     if (argc == 2 || argc == 3) {
-        g->mode = MODE_ONLINE;
+    	g->mode = MODE_ONLINE;
         strncpy(g->server_addr, argv[1], MAX_ADDR_LENGTH);
+		if (argc == 3 && !isint(argv[2])) {
+			fprintf(stderr, "Invalid port!\n");
+			exit(1);
+		}
         g->server_port = argc == 3 ? atoi(argv[2]) : DEFAULT_PORT;
-        snprintf(g->db_path, MAX_PATH_LENGTH,
+		snprintf(g->db_path, MAX_PATH_LENGTH,
             "cache.%s.%d.db", g->server_addr, g->server_port);
     }
     else {

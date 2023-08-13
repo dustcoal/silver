@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 2.8)
 
 project(craft)
 
+# Specify the desired build directory (relative or absolute path)
+#set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)  # Change 'build' to your desired build directory
+
+# Create the build directory if it doesn't exist
+#file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Use the specified build directory for out-of-source build
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 FILE(GLOB SOURCE_FILES src/*.c)
 
 add_executable(
@@ -13,7 +24,7 @@ add_executable(
     deps/sqlite/sqlite3.c
     deps/tinycthread/tinycthread.c)
 
-add_definitions(-std=c99 -O3)
+add_definitions(-std=c99)
 
 add_subdirectory(deps/glfw)
 include_directories(deps/glew/include)
@@ -47,3 +58,8 @@ if(MINGW)
     target_link_libraries(craft ws2_32.lib glfw
         ${GLFW_LIBRARIES} ${CURL_LIBRARIES})
 endif()
+
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")

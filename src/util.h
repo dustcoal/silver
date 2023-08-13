@@ -43,4 +43,7 @@ int char_width(char input);
 int string_width(const char *input);
 int wrap(const char *input, int max_width, char *output, int max_length);
 
+int isint(char *str);
+int debug();
+
 #endif

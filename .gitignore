@@ -7,6 +7,11 @@ config.py
 craft
 world
 env
+.idea
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake
+Testing/
+*.cbp
 log.txt
 *.o
 *.db

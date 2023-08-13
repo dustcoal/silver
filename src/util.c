@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <ctype.h>
+#include <limits.h>
 #include "lodepng.h"
 #include "matrix.h"
 #include "util.h"
@@ -222,4 +224,39 @@ int wrap(const char *input, int max_width, char *output, int max_length) {
     }
     free(text);
     return line_number;
+}
+
+int	numlen(long long num) {
+	int res;
+
+	res = 1;
+	if (num < 0)
+		res ++;
+	num = llabs(num);
+	num /= 10;
+	while (num > 0) {
+		res ++;
+		num /= 10;
+	}
+	return (res);
+}
+
+int isint(char *str) {
+	long int tmp;
+
+	for (int i = 0; i < strlen(str); ++i) {
+		if (!isdigit(str[i])) {
+			return (0);
+		}
+	}
+	if (strlen(str) > numlen(INT_MAX))
+		return (0);
+	tmp = atol(str);
+	return (tmp <= INT_MAX);
+}
+
+int debug() {
+	if (getenv("DEBUG_CRAFT"))
+		return (1);
+	return (0);
 }
