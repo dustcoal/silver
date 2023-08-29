@@ -32,10 +32,6 @@
  #define _USE_MATH_DEFINES
 #endif
 
-#ifndef M_PI
-#define M_PI 3.14159265359
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
