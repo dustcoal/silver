@@ -1,7 +1,7 @@
 #include <math.h>
-#include "config.h"
-#include "matrix.h"
-#include "util.h"
+#include "headers/config.h"
+#include "headers/matrix.h"
+#include "headers/util.h"
 
 void normalize(float *x, float *y, float *z) {
     float d = sqrtf((*x) * (*x) + (*y) * (*y) + (*z) * (*z));

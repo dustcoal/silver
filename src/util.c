@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "lodepng.h"
-#include "matrix.h"
-#include "util.h"
+#include "headers/matrix.h"
+#include "headers/util.h"
 
 int rand_int(int n) {
     int result;

@@ -6,19 +6,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "auth.h"
-#include "client.h"
-#include "config.h"
-#include "cube.h"
-#include "db.h"
-#include "item.h"
-#include "map.h"
-#include "matrix.h"
 #include "noise.h"
-#include "sign.h"
 #include "tinycthread.h"
-#include "util.h"
-#include "world.h"
+
+#include "headers/auth.h"
+#include "headers/client.h"
+#include "headers/config.h"
+#include "headers/cube.h"
+#include "headers/db.h"
+#include "headers/item.h"
+#include "headers/map.h"
+#include "headers/matrix.h"
+#include "headers/sign.h"
+#include "headers/util.h"
+#include "headers/world.h"
+
 
 #define MAX_CHUNKS 8192
 #define MAX_PLAYERS 128
@@ -368,7 +370,10 @@ void draw_lines(Attrib *attrib, GLuint buffer, int components, int count) {
 }
 
 void draw_chunk(Attrib *attrib, Chunk *chunk) {
+    /**/glEnable(GL_BLEND);
+    /**/glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     draw_triangles_3d_ao(attrib, chunk->buffer, chunk->faces * 6);
+    /**/glDisable(GL_BLEND);
 }
 
 void draw_item(Attrib *attrib, GLuint buffer, int count) {
@@ -397,7 +402,10 @@ void draw_sign(Attrib *attrib, GLuint buffer, int length) {
 }
 
 void draw_cube(Attrib *attrib, GLuint buffer) {
+    /**///glEnable(GL_BLEND);
+    /**///glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     draw_item(attrib, buffer, 36);
+    /**///glDisable(GL_BLEND);
 }
 
 void draw_plant(Attrib *attrib, GLuint buffer) {
@@ -2583,19 +2591,30 @@ void reset_model() {
     g->time_changed = 1;
 }
 
+
+void errorCallback(int error, const char* description)
+{
+    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+}
+
 int main(int argc, char **argv) {
+    printf("starting\n");
     // INITIALIZATION //
     curl_global_init(CURL_GLOBAL_DEFAULT);
+    printf("initted curl\n");
     srand(time(NULL));
     rand();
 
+    glfwSetErrorCallback(errorCallback);
     // WINDOW INITIALIZATION //
     if (!glfwInit()) {
         return -1;
     }
+    printf("initted glfw\n");
     create_window();
     if (!g->window) {
         glfwTerminate();
+        printf("couldn't open window\n");
         return -1;
     }
 
@@ -2608,8 +2627,10 @@ int main(int argc, char **argv) {
     glfwSetScrollCallback(g->window, on_scroll);
 
     if (glewInit() != GLEW_OK) {
+        printf("couldn't init glew\n");
         return -1;
     }
+
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -2733,6 +2754,7 @@ int main(int argc, char **argv) {
         if (g->mode == MODE_OFFLINE || USE_CACHE) {
             db_enable();
             if (db_init(g->db_path)) {
+                printf("couldnt init db\n");
                 return -1;
             }
             if (g->mode == MODE_ONLINE) {
@@ -2773,7 +2795,20 @@ int main(int argc, char **argv) {
 
         // BEGIN MAIN LOOP //
         double previous = glfwGetTime();
+
+
+       /* if(!glfwGetWindowAttrib(g->window, GLFW_ICONIFIED)) {
+                glfwPollEvents();
+            } else {
+                glfwWaitEvents();
+            }
+    */
+
         while (1) {
+
+            if(!glfwGetWindowAttrib(g->window, GLFW_ICONIFIED)) {
+
+
             // WINDOW SIZE AND SCALE //
             g->scale = get_scale_factor();
             glfwGetFramebufferSize(g->window, &g->width, &g->height);
@@ -2937,15 +2972,24 @@ int main(int argc, char **argv) {
             glfwSwapBuffers(g->window);
             glfwPollEvents();
             if (glfwWindowShouldClose(g->window)) {
+                printf("should close window, closing...\n");
                 running = 0;
                 break;
             }
             if (g->mode_changed) {
                 g->mode_changed = 0;
+                printf("g mode changed, closing...\n");
                 break;
             }
+
+
+            } else {
+                glfwWaitEvents();
+            }
+
         }
 
+        printf("shutting down\n");
         // SHUTDOWN //
         db_save_state(s->x, s->y, s->z, s->rx, s->ry);
         db_close();
@@ -2956,7 +3000,7 @@ int main(int argc, char **argv) {
         delete_all_chunks();
         delete_all_players();
     }
-
+    printf("terminating glfw...\n");
     glfwTerminate();
     curl_global_cleanup();
     return 0;

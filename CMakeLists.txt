@@ -30,9 +30,19 @@ include_directories(deps/tinycthread)
 
 if(MINGW)
     set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
-        "C:/Program Files/CURL/lib" "C:/Program Files (x86)/CURL/lib")
+        "C:/Program Files/CURL/lib" "C:/Program Files (x86)/CURL/lib" "deps/curl_windows/lib")
     set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}
-        "C:/Program Files/CURL/include" "C:/Program Files (x86)/CURL/include")
+        "C:/Program Files/CURL/include" "C:/Program Files (x86)/CURL/include" "deps/curl_windows/include")
+endif()
+
+if(WIN32 AND NOT MINGW)
+    set(CURL_INCLUDE_DIR "deps/curl_windows/include")
+    set(CURL_LIBRARY "deps/curl_windows/lib/libcurl")
+endif()
+
+if(MINGW)
+    set(CURL_INCLUDE_DIR "deps/curl_windows/include")
+    #set(CURL_LIBRARY "deps/curl_windows/lib/libcurl.lib")
 endif()
 
 find_package(CURL REQUIRED)
@@ -49,6 +59,11 @@ if(UNIX)
 endif()
 
 if(MINGW)
-    target_link_libraries(craft ws2_32.lib glfw
-        ${GLFW_LIBRARIES} ${CURL_LIBRARIES})
+    target_link_libraries(craft ${CURL_LIBRARIES}
+        ws2_32.lib wldap32.lib advapi32.lib kernel32.lib comdlg32.lib crypt32.lib normaliz.lib glfw opengl32
+        ${GLFW_LIBRARIES})
+endif()
+
+if(WIN32)
+    target_link_libraries(craft ${CURL_LIBRARIES} ws2_32.lib wldap32.lib advapi32.lib kernel32.lib comdlg32.lib crypt32.lib normaliz.lib glfw opengl32 ${GLFW_LIBRARIES})
 endif()

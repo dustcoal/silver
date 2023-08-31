@@ -25,3 +25,4 @@ glfw3Config.cmake
 glfw3ConfigVersion.cmake
 glfw_config.h
 libglfw3.a
+build/

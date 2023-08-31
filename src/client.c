@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "client.h"
+#include "headers/client.h"
 #include "tinycthread.h"
 
 #define QUEUE_SIZE 1048576
@@ -58,8 +58,10 @@ int client_sendall(int sd, char *data, int length) {
 
 void client_send(char *data) {
     if (!client_enabled) {
+    	printf("client not enabled!\n");
         return;
     }
+	printf("sending data: %s\n", data);
     if (client_sendall(sd, data, strlen(data)) == -1) {
         perror("client_sendall");
         exit(1);

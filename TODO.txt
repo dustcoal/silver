@@ -1,0 +1,8 @@
+* split code in client / common / server. force client to connect to an existing server, generate one if playing solo
+* feature parity with 1.20
+* find ways to optimize saves, maybe sqlite is not the best thing, idk
+* lod
+* shader support
+* possibility of self-hosted standalone account management service, as well as possibility to host one directly on a server
+* standard and extended resource pack support
+* find elegant way to enable pure C mod modules or maybe say fuck it and consolidate some kind of gt:nh behemoth in C
