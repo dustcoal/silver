@@ -22,6 +22,7 @@ log.txt
 *.db
 *.exe
 *.dll
+!libcurl.dll
 *.pyc
 cmake_uninstall.cmake
 glfw3.pc
