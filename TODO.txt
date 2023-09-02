@@ -6,3 +6,4 @@
 * possibility of self-hosted standalone account management service, as well as possibility to host one directly on a server
 * standard and extended resource pack support
 * find elegant way to enable pure C mod modules or maybe say fuck it and consolidate some kind of gt:nh behemoth in C
+* Ambient occlusion;And tinted sides on blocks;And fake lights on hand held items
