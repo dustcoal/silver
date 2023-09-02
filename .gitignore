@@ -30,3 +30,10 @@ glfw3ConfigVersion.cmake
 glfw_config.h
 libglfw3.a
 build/
+git_env.bat
+*.exp
+*.ilk
+craft.lib
+*.pdb
+deps/glfw/src/glfw3.lib
+server.lib
