@@ -5,8 +5,11 @@ CMakeFiles
 cmake_install.cmake
 config.py
 craft
+!*/craft/
 server
+!*/server/
 world
+!*/world/
 env
 gt
 .idea
