@@ -14,9 +14,18 @@ FILE(GLOB SERVER_SOURCE_FILES
         src/server/config_main.c
         )
 
+FILE(GLOB CLIENT_SOURCE_FILES
+        src/client/network.c
+        src/client/world_interact.c
+        src/client/chat.c
+        )
+
 add_executable(
     craft
+
     ${SOURCE_FILES}
+
+    ${CLIENT_SOURCE_FILES}
     deps/glew/src/glew.c
     deps/lodepng/lodepng.c
     deps/noise/noise.c

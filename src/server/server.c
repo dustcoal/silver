@@ -14,10 +14,6 @@ int main(int argc, char *argv[]) {
 	(void) argc;
 	(void) argv;
 
-	log_debug("debug log");
-	log_warn("lol warning");
-	log_error("lol eror");
-
 	common_init(SERVER);
 	logging_init();
 

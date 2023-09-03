@@ -14,7 +14,6 @@
 #include "common/common.h"
 
 #ifdef _WIN32
-//#include <WinCon.h>
 #include <windows.h>
 #endif
 
