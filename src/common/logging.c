@@ -5,13 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#ifdef __linux__
 #include <unistd.h>
+#endif
 
 #include "common/logging.h"
 #include "common/common.h"
 
 #ifdef _WIN32
-#include <WinCon.h>
+//#include <WinCon.h>
 #include <windows.h>
 #endif
 
@@ -24,7 +27,10 @@
 #elif _WIN32
 #define FOREGROUND_WHITE	(FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN)
 #define FOREGROUND_YELLOW	(FOREGROUND_RED | FOREGROUND_GREEN)
+#define FOREGROUND_INTENSE_YELLOW	(FOREGROUND_YELLOW | FOREGROUND_INTENSITY)
 #define FOREGROUND_INTENSE_RED	(FOREGROUND_RED | FOREGROUND_INTENSITY)
+#define BACKGROUND_INTENSE_WHITE	(BACKGROUND_WHITE | BACKGROUND_INTENSITY)
+#define BACKGROUND_CYAN	(BACKGROUND_BLUE | BACKGROUND_GREEN)
 #endif
 
 /*#ifdef _WIN32
@@ -59,10 +65,13 @@ int	term_has_color = 0;
 
 
 int logging_init() {
+	#ifdef __linux__
 	term_has_color = unix_term_has_color();
+	#endif
 }
 
 /* checks if unix terminal can display color */
+#ifdef __linux__
 int	unix_term_has_color() {
 	#ifdef  _WIN32
 	return (0);
@@ -97,6 +106,7 @@ int	unix_term_has_color() {
 		return(0);
 	}
 }
+#endif
 
 /* returns pointer to the beginning of the substring */
 const char* get_filename(const char* path) {
@@ -154,30 +164,31 @@ int print_log(enum Enum_Log_Severity severity, const char *file, const char *fun
 	const char* filename_without_extension;
 	char file_func_concat[100];
 
-	if (severity == DEBUG && !DEBUG_MODE) {
+	if (severity == DEBUG_LOG_SEVERITY && !DEBUG_MODE) {
 		return (1);
 	}
 
 	switch (severity) {
-		case DEBUG:
+		case DEBUG_LOG_SEVERITY:
 			severity_symbol = "DEBUG";
 			break;
-		case INFO:
+		case INFO_LOG_SEVERITY:
 			severity_symbol = "INFO";
 			break;
-		case WARNING:
+		case WARNING_LOG_SEVERITY:
 			#ifdef __linux__
 			if (term_has_color)
 				severity_symbol = YELLOW"WARN"NC;
 			else
 				severity_symbol = "WARN";
 			#elif _WIN32
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_YELLOW);
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSE_YELLOW);
+			severity_symbol = "WARN";
 			#else
 			severity_symbol = "WARN";
 			#endif
 			break;
-		case ERROR:
+		case ERROR_LOG_SEVERITY:
 			#ifdef __linux__
 			if (term_has_color)
 				severity_symbol = RED"ERROR"NC;
@@ -185,18 +196,20 @@ int print_log(enum Enum_Log_Severity severity, const char *file, const char *fun
 				severity_symbol = "ERROR";
 			#elif _WIN32
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+			severity_symbol = "ERROR";
 			#else
 			severity_symbol = "ERROR";
 			#endif
 			break;
-		case FATAL:
+		case FATAL_LOG_SEVERITY:
 			#ifdef __linux__
 			if (term_has_color)
 				severity_symbol = BACKGROUND_BLACK DARKRED"FATAL"NC;
 			else
 				severity_symbol = "FATAL";
 			#elif _WIN32
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSE_RED);
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSE_RED | BACKGROUND_BLUE);
+			severity_symbol = "FATAL";
 			#else
 			severity_symbol = "FATAL";
 			#endif
