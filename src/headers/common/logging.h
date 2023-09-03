@@ -1,6 +1,8 @@
 #ifndef CRAFT_LOGGING_H
 #define CRAFT_LOGGING_H
 
+int logging_init();
+
 enum Enum_Log_Severity {
 	DEBUG,
 	INFO,
@@ -16,5 +18,6 @@ int print_log(enum Enum_Log_Severity severity, const char *file, const char *fun
 #define log_error(content) print_log(ERROR, __FILE__, __func__, content)
 #define log_fatal(content) print_log(FATAL, __FILE__, __func__, content)
 
+int	unix_term_has_color();
 
 #endif

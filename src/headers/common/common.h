@@ -7,6 +7,9 @@ enum Enum_Side {
 	NONE
 };
 
+int	common_init(enum Enum_Side side);
+
 extern int NET_SIDE;
+extern int DEBUG_MODE;
 
 #endif

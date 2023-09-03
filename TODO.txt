@@ -1,3 +1,4 @@
+* logging to file. should be able to pickup logpath and logname from command line args, otherwise determine one or both automatically
 * split code in client / common / server. force client to connect to an existing server, generate one if playing solo
 * feature parity with 1.20
 * find ways to optimize saves, maybe sqlite is not the best thing, idk

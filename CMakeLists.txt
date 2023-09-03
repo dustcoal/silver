@@ -37,7 +37,7 @@ add_executable(
     deps/cJSON/cJSON.c
 )
 
-add_definitions(-std=c99 -O3)
+add_definitions(-std=gnu99 -O3)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)

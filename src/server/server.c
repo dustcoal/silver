@@ -13,7 +13,9 @@ ServerConfig server_config;
 int main(int argc, char *argv[]) {
 	(void) argc;
 	(void) argv;
-	NET_SIDE = SERVER;
+	common_init(SERVER);
+	logging_init();
+
 	log_info("Server starting");
 	if (!read_server_config(&server_config)) {
 		log_fatal("Failed to parse config");

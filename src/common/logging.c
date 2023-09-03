@@ -1,10 +1,31 @@
+#ifdef NO_OLDNAMES
+#undef NO_OLDNAMES
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "common/logging.h"
 #include "common/common.h"
+
+#ifdef _WIN32
+#include <WinCon.h>
+#include <windows.h>
+#endif
+
+#ifdef __linux__
+#define YELLOW "\x001b[33m"
+#define RED "\x001b[91m"
+#define DARKRED "\x001b[31m"
+#define NC "\x001b[0m"
+#define BACKGROUND_BLACK "\x001b[40m"
+#elif _WIN32
+#define FOREGROUND_WHITE	(FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN)
+#define FOREGROUND_YELLOW	(FOREGROUND_RED | FOREGROUND_GREEN)
+#define FOREGROUND_INTENSE_RED	(FOREGROUND_RED | FOREGROUND_INTENSITY)
+#endif
 
 /*#ifdef _WIN32
 #include <Windows.h>
@@ -33,6 +54,49 @@ const char* detectDisplayServer() {
 }
 #endif
 */
+
+int	term_has_color = 0;
+
+
+int logging_init() {
+	term_has_color = unix_term_has_color();
+}
+
+/* checks if unix terminal can display color */
+int	unix_term_has_color() {
+	#ifdef  _WIN32
+	return (0);
+	#endif
+	const char *command = "which tput";
+	int tput_available;
+
+	// Use the popen function to run the "which tput" command and capture its output
+	FILE *fp = popen(command, "r");
+	if (fp == NULL) {
+		perror("popen");
+		return 1;
+	}
+	// Read the command output
+	char output[1024];
+	if (fgets(output, sizeof(output), fp) != NULL) {
+		tput_available = 1;
+	} else {
+		// If "tput" was not found, it's not available
+		tput_available = 0;
+	}
+	// Close the file pointer
+	pclose(fp);
+	if (!tput_available) {
+		log_debug("Tput not available");
+		return (0);
+	}
+	if (system("tput setaf 1 > /dev/null 2>&1") == 0) {
+		return (1);
+	} else {
+		log_debug("Tput failed, terminal has no color");
+		return(0);
+	}
+}
 
 /* returns pointer to the beginning of the substring */
 const char* get_filename(const char* path) {
@@ -90,6 +154,10 @@ int print_log(enum Enum_Log_Severity severity, const char *file, const char *fun
 	const char* filename_without_extension;
 	char file_func_concat[100];
 
+	if (severity == DEBUG && !DEBUG_MODE) {
+		return (1);
+	}
+
 	switch (severity) {
 		case DEBUG:
 			severity_symbol = "DEBUG";
@@ -98,13 +166,40 @@ int print_log(enum Enum_Log_Severity severity, const char *file, const char *fun
 			severity_symbol = "INFO";
 			break;
 		case WARNING:
+			#ifdef __linux__
+			if (term_has_color)
+				severity_symbol = YELLOW"WARN"NC;
+			else
+				severity_symbol = "WARN";
+			#elif _WIN32
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_YELLOW);
+			#else
 			severity_symbol = "WARN";
+			#endif
 			break;
 		case ERROR:
+			#ifdef __linux__
+			if (term_has_color)
+				severity_symbol = RED"ERROR"NC;
+			else
+				severity_symbol = "ERROR";
+			#elif _WIN32
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+			#else
 			severity_symbol = "ERROR";
+			#endif
 			break;
 		case FATAL:
+			#ifdef __linux__
+			if (term_has_color)
+				severity_symbol = BACKGROUND_BLACK DARKRED"FATAL"NC;
+			else
+				severity_symbol = "FATAL";
+			#elif _WIN32
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSE_RED);
+			#else
 			severity_symbol = "FATAL";
+			#endif
 			break;
 		default:
 			severity_symbol = "UNKNOWN";
@@ -127,6 +222,9 @@ int print_log(enum Enum_Log_Severity severity, const char *file, const char *fun
 	if (printf("[%s] [%s/%s] [%s]: %s\n", timestamp, side_symbol, severity_symbol, file_func_concat, content) < 0) {
 		return (0);
 	}
+	#ifdef _WIN32
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_WHITE);
+	#endif
 	return (1);
 }
 
