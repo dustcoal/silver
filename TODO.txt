@@ -1,10 +1,14 @@
 * logging to file. should be able to pickup logpath and logname from command line args, otherwise determine one or both automatically
-* split code in client / common / server. force client to connect to an existing server, generate one if playing solo
-* feature parity with 1.20
+* split code in client / common / server. force client to connect to an existing server, no integrated server bullshit
+* feature parity with whatever recent minecraft but focus on 1.7.10
 * find ways to optimize saves, maybe sqlite is not the best thing, idk
 * lod
-* shader support
-* possibility of self-hosted standalone account management service, as well as possibility to host one directly on a server
+* shader support, maybe add a translation layer to classic optifine shaders
+* possibility of self-hosted standalone account management service, (as well as possibility to host one directly on a server, might be more hassle than just standalone)
 * standard and extended resource pack support
 * find elegant way to enable pure C mod modules or maybe say fuck it and consolidate some kind of gt:nh behemoth in C
 * Ambient occlusion;And tinted sides on blocks;And fake lights on hand held items
+* find some nice solution for gui. I feel like it's either full spartan à la minecraft or something html/css shit (https://mikke89.github.io/RmlUiDoc, https://github.com/litehtml/litehtml)
+* tick any visited sleeping chunks with entities inside periodically. make the tick speed faster there so they catch up. simplify whatever possible (e.g. mob behavior/movement)
+* some smart way of implementing cubic chunks. periodical chunk wakes should propagate lighting and maybe a fake ceiling?? there should be some heuristics to determine when the player falls to load more chunks below at a time
+* prints should probably be protected by a mutex

@@ -11,12 +11,14 @@ enum Enum_Log_Severity {
 	FATAL_LOG_SEVERITY
 };
 
-int print_log(enum Enum_Log_Severity severity, const char *file, const char *func, char *content);
-#define log_debug(content) print_log(DEBUG_LOG_SEVERITY, __FILE__, __func__, content)
-#define log_info(content) print_log(INFO_LOG_SEVERITY, __FILE__, __func__, content)
-#define log_warn(content) print_log(WARNING_LOG_SEVERITY, __FILE__, __func__, content)
-#define log_error(content) print_log(ERROR_LOG_SEVERITY, __FILE__, __func__, content)
-#define log_fatal(content) print_log(FATAL_LOG_SEVERITY, __FILE__, __func__, content)
+#define FAILEDALLOC "Failed Allocation\n"
+
+int print_log(enum Enum_Log_Severity severity, const char *file, const char *func, char *content, int newline);
+#define log_debug(content, newline) print_log(DEBUG_LOG_SEVERITY, __FILE__, __func__, content, newline)
+#define log_info(content, newline) print_log(INFO_LOG_SEVERITY, __FILE__, __func__, content, newline)
+#define log_warn(content, newline) print_log(WARNING_LOG_SEVERITY, __FILE__, __func__, content, newline)
+#define log_error(content, newline) print_log(ERROR_LOG_SEVERITY, __FILE__, __func__, content, newline)
+#define log_fatal(content, newline) print_log(FATAL_LOG_SEVERITY, __FILE__, __func__, content, newline)
 
 int	unix_term_has_color();
 

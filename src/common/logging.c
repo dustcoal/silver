@@ -95,13 +95,13 @@ int	unix_term_has_color() {
 	// Close the file pointer
 	pclose(fp);
 	if (!tput_available) {
-		log_debug("Tput not available");
+		log_debug("Tput not available", 1);
 		return (0);
 	}
 	if (system("tput setaf 1 > /dev/null 2>&1") == 0) {
 		return (1);
 	} else {
-		log_debug("Tput failed, terminal has no color");
+		log_debug("Tput failed, terminal has no color", 1);
 		return(0);
 	}
 }
@@ -156,7 +156,7 @@ void get_timestamp(char *timestamp) {
 	timestamp[8] = '\0';
 }
 
-int print_log(enum Enum_Log_Severity severity, const char *file, const char *func, char *content) {
+int print_log(enum Enum_Log_Severity severity, const char *file, const char *func, char *content, int newline) {
 	char *severity_symbol;
 	char *side_symbol;
 	char timestamp[9];
@@ -231,7 +231,13 @@ int print_log(enum Enum_Log_Severity severity, const char *file, const char *fun
 	get_timestamp(timestamp);
 	filename_without_extension = get_filename(file);
 	snprintf(file_func_concat, sizeof(file_func_concat), "%s:%s", filename_without_extension, func);
-	if (printf("[%s] [%s/%s] [%s]: %s\n", timestamp, side_symbol, severity_symbol, file_func_concat, content) < 0) {
+	char nl[2];
+	nl[0] = 0;
+	if (newline) {
+		nl[0] = '\n';
+		nl[1] = 0;
+	}
+	if (printf("[%s] [%s/%s] [%s]: %s%s", timestamp, side_symbol, severity_symbol, file_func_concat, content, nl) < 0) {
 		return (0);
 	}
 	#ifdef _WIN32

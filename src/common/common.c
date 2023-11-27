@@ -12,6 +12,6 @@ int	common_init(enum Enum_Side side) {
 	/* debug mode check */
 	if (getenv("DEBUG")) {
 		DEBUG_MODE = 1;
-		log_debug("Debug mode enabled");
+		log_debug("Debug mode enabled", 1);
 	}
 }
