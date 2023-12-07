@@ -1,8 +1,8 @@
-#include <cJSON.h>
+#include "cJSON.h"
+#include "log.h"
 
 #include "server/server.h"
 #include "server/default_conf.h"
-#include "common/logging.h"
 
 /*
  * The config is a struct found in servrt/server.h. It is read and written into a json using cJSON.
@@ -16,19 +16,19 @@
 char *create_default_config(void) {
 	cJSON *json = cJSON_CreateObject();
 	if (!json) {
-		log_fatal(FAILEDALLOC, 1);
+		log_fatal(FAILEDALLOC);
 		return (NULL);
 	}
 	if(!cJSON_AddNumberToObject(json, "host", default_conf.host)) {
-		log_fatal("ERROR", 1);
+		log_fatal("ERROR\n");
 		return (NULL);
 	}
 	if(!cJSON_AddNumberToObject(json, "port", default_conf.port)) {
-		log_fatal("ERROR", 1);
+		log_fatal("ERROR\n");
 		return (NULL);
 	}
 	if(!cJSON_AddNumberToObject(json, "chunk_size", default_conf.chunk_size)) {
-		log_fatal("ERROR", 1);
+		log_fatal("ERROR\n");
 		return (NULL);
 	}
 }

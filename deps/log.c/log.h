@@ -11,15 +11,23 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <time.h>
 
 #define LOG_VERSION "0.1.0"
+
+#define FAILEDALLOC "Allocation failed\n"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
   va_list ap;
   const char *fmt;
   const char *file;
-  struct tm *time;
+  int time_initted;
+  struct tm time;
   void *udata;
   int line;
   int level;
@@ -46,4 +54,10 @@ int log_add_fp(FILE *fp, int level);
 
 void log_log(int level, const char *file, int line, const char *fmt, ...);
 
+int logging_init(FILE *console_file_);
+int	unix_term_has_color();
+
+#ifdef __cplusplus
+}
+#endif
 #endif

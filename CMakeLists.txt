@@ -2,24 +2,44 @@ cmake_minimum_required(VERSION 3.10)
 
 project(craft)
 
-# this makes the qoi implementation available
-#add_definitions(-DQOI_IMPLEMENTATION)
+if (LINUX)
+    add_compile_options(-fsanitize=address,leak)
+    add_link_options(-fsanitize=address,leak)
+    add_compile_options(-ggdb)
+    add_link_options(-ggdb)
+endif()
 
 add_definitions(-DENABLE_CJSON_UTILS=On -DENABLE_CJSON_TEST=Off)
 add_definitions(-DLOG_USE_COLOR)
+
+if (UNIX)
+    add_definitions(-DUNIX)
+endif()
+
+if (WIN32 OR WIN64)
+    add_definitions(-DWINDOWS)
+endif()
+
+if (APPLE)
+    add_definitions(-DAPPLE)
+endif()
 
 FILE(GLOB SOURCE_FILES src/*.c)
 
 FILE(GLOB COMMON_SOURCE_FILES
     src/common/common.c
-    src/common/logging.c
     src/common/config.c
     src/common/qoi_utils.c
 
+    src/common/util/itoa.c
     src/common/util/ltoa.c
     src/common/util/ulltoa.c
     src/common/util/pointer_util.c
     src/common/util/min_max.c
+    src/common/util/windows_console_helper.c
+    src/common/util/vec_util.c
+    src/common/util/file_util.c
+    src/common/util/ftoa.c
 )
 
 FILE(GLOB SERVER_SOURCE_FILES
@@ -41,6 +61,7 @@ FILE(GLOB COMMON_DEPS
     deps/cJSON/cJSON.c
     deps/qoi/qoi.c
     deps/log.c/log.c
+    deps/c-vector/vec.c
 )
 
 add_executable(
@@ -61,7 +82,11 @@ add_executable(
     ${COMMON_DEPS}
 )
 
-add_definitions(-std=gnu99 -O3)
+# Used by the logger
+target_compile_definitions(craft PUBLIC NET_SIDE_SYMBOL="CLIENT")
+target_compile_definitions(server PUBLIC NET_SIDE_SYMBOL="SERVER")
+
+add_definitions(-std=gnu99) #-O3)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -82,10 +107,12 @@ include_directories(deps/cwalk/include)
 include_directories(deps/qoi)
 include_directories(deps/stb)
 include_directories(deps/log.c)
+include_directories(deps/klib)
+include_directories(deps/c-vector)
 
 #TODO: Link necessary libraries for target 'server' (it doesn't link to graphics at all (except image manipulation libs))
-target_link_libraries(craft cwalk)
-target_link_libraries(server cwalk)
+target_link_libraries(craft cwalk m)
+target_link_libraries(server cwalk m)
 
 
 if(MINGW)

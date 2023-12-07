@@ -1,6 +1,8 @@
 #ifndef CRAFT_COMMON_H
 #define CRAFT_COMMON_H
 
+/* deps */
+
 enum Enum_Side {
 	CLIENT,
 	SERVER,
