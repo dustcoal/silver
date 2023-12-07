@@ -62,6 +62,11 @@ int main(int argc, char *argv[]) {
 			float brightness = get_float_val(section1, "brightness", "Screen brightness.", 3.4f, 0.0f, 10.0f);
 			printf("brightness: %f\n", brightness);
 
+			printf("some_bool: %d\n", get_bool_val(section1, "some_bool", "this is a boolean", 1));
+			char *le_str = get_string_val(section1, "le_str", "this is a string", "sneed");
+			printf("le_str: %s\n", le_str);
+			free(le_str);
+
 			char *str = cJSON_Print(conf);
 			printf("%s\n", str);
 

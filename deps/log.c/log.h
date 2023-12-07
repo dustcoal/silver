@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "cwalk.h"
+
 #define LOG_VERSION "0.1.0"
 
 #define FAILEDALLOC "Allocation failed\n"
