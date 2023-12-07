@@ -67,6 +67,15 @@ int main(int argc, char *argv[]) {
 			printf("le_str: %s\n", le_str);
 			free(le_str);
 
+			int _[4] = {1, -2, 3, -69};
+			vec_int default_vec = intarr_to_vec(_, 4);
+			vec_int le_vec_int = get_int_vec(section1, "le_vec_int", "this is an int array (vector) (real)", default_vec);
+			vector_free(default_vec);
+			char *vec_int_charred = vec_int_to_str(le_vec_int);
+			printf("le_vec_int: [%s]\n", vec_int_charred);
+			free(vec_int_charred);
+			vector_free(le_vec_int);
+
 			char *str = cJSON_Print(conf);
 			printf("%s\n", str);
 

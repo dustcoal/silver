@@ -369,6 +369,7 @@ static char *get_final_comment_intvec(char *comment, vec_int default_val) {
 	vec_str tmp2 = NULL;
 	char *tmp4 = NULL;
 
+	/* this tmp holds unallocated strings */
 	tmp = vector_create();
 	if (!tmp) {
 		goto end;
@@ -377,6 +378,7 @@ static char *get_final_comment_intvec(char *comment, vec_int default_val) {
 		goto end;
 	}
 
+	/* this tmp holds allocated itoa's */
 	tmp2 = vector_create();
 	if (!tmp2) {
 		goto end;
@@ -409,7 +411,7 @@ static char *get_final_comment_intvec(char *comment, vec_int default_val) {
 		vector_free(tmp);
 	}
 	if (tmp2) {
-		vector_free(tmp2);
+		free_vec_str_allocated(tmp2);
 	}
 	if (tmp4) {
 		free(tmp4);
@@ -418,17 +420,10 @@ static char *get_final_comment_intvec(char *comment, vec_int default_val) {
 }
 
 int get_int_val(jsonConfig *cfg, char *name, char *comment, int default_val, int min_val, int max_val) {
-	cJSON *nameval = NULL;
 	cJSON *newobj = NULL;
 	cJSON *oldobj = NULL;
 	cJSON *infoobj = NULL;
 	char *finalcomment = NULL;
-
-	nameval = cJSON_GetObjectItemCaseSensitive(cfg, "name");
-	if (!nameval || !cJSON_IsString(nameval)) {
-		log_warn("Failed to get value '%s': couldn't find section name\n", name);
-		goto end;
-	}
 
 	finalcomment = get_final_comment_int(comment, default_val, min_val, max_val);
 	if (!finalcomment) {
@@ -475,17 +470,10 @@ int get_int_val(jsonConfig *cfg, char *name, char *comment, int default_val, int
 }
 
 float get_float_val(jsonConfig *cfg, char *name, char *comment, float default_val, float min_val, float max_val) {
-	cJSON *nameval = NULL;
 	cJSON *newobj = NULL;
 	cJSON *oldobj = NULL;
 	cJSON *infoobj = NULL;
 	char *finalcomment = NULL;
-
-	nameval = cJSON_GetObjectItemCaseSensitive(cfg, "name");
-	if (!nameval || !cJSON_IsString(nameval)) {
-		log_warn("Failed to get value '%s': couldn't find section name\n", name);
-		goto end;
-	}
 
 	finalcomment = get_final_comment_float(comment, default_val, min_val, max_val);
 	if (!finalcomment) {
@@ -530,17 +518,10 @@ float get_float_val(jsonConfig *cfg, char *name, char *comment, float default_va
 }
 
 int get_bool_val(jsonConfig *cfg, char *name, char *comment, int default_val) {
-	cJSON *nameval = NULL;
 	cJSON *newobj = NULL;
 	cJSON *oldobj = NULL;
 	cJSON *infoobj = NULL;
 	char *finalcomment = NULL;
-
-	nameval = cJSON_GetObjectItemCaseSensitive(cfg, "name");
-	if (!nameval || !cJSON_IsString(nameval)) {
-		log_warn("Failed to get value '%s': couldn't find section name\n", name);
-		goto end;
-	}
 
 	finalcomment = get_final_comment_bool(comment, default_val);
 	if (!finalcomment) {
@@ -585,17 +566,10 @@ int get_bool_val(jsonConfig *cfg, char *name, char *comment, int default_val) {
 }
 
 char *get_string_val(jsonConfig *cfg, char *name, char *comment, const char *default_val) {
-	cJSON *nameval = NULL;
 	cJSON *newobj = NULL;
 	cJSON *oldobj = NULL;
 	cJSON *infoobj = NULL;
 	char *finalcomment = NULL;
-
-	nameval = cJSON_GetObjectItemCaseSensitive(cfg, "name");
-	if (!nameval || !cJSON_IsString(nameval)) {
-		log_warn("Failed to get value '%s': couldn't find section name\n", name);
-		goto end;
-	}
 
 	finalcomment = get_final_comment_str(comment, default_val);
 	if (!finalcomment) {
@@ -640,54 +614,55 @@ char *get_string_val(jsonConfig *cfg, char *name, char *comment, const char *def
 }
 
 vec_int get_int_vec(jsonConfig *cfg, char *name, char *comment, int *default_val) {
-	/*
-	int *res = vector_create();
-	for (int i = 0; i < 10; ++i) {
-		vector_add(&res, i);
-	}
-	return (res);
-	*/
+	cJSON *newobj = NULL;
+	cJSON *oldobj = NULL;
+	cJSON *infoobj = NULL;
+	char *finalcomment = NULL;
 
-
-	cJSON *nameval = cJSON_GetObjectItemCaseSensitive(cfg, "name");
-	if (!nameval || !cJSON_IsString(nameval)) {
-		log_warn("Failed to get value '%s': couldn't find section name\n", name);
-		if (nameval) {
-			cJSON_Delete(nameval);
-		}
-		return (vector_copy(default_val));
+	finalcomment = get_final_comment_intvec(comment, default_val);
+	if (!finalcomment) {
+		goto end;
 	}
-	cJSON *objval = cJSON_GetObjectItemCaseSensitive(cfg, name);
-	if (!objval || !cJSON_IsObject(objval)) {
-		log_warn("Failed to get value '%s' for config/section '%s'\n", name, nameval->valuestring);
-		cJSON_Delete(nameval);
-		if (objval) {
-			cJSON_Delete(objval);
-			cJSON_DeleteItemFromObjectCaseSensitive(cfg, name);
+
+	oldobj = cJSON_GetObjectItemCaseSensitive(cfg, name);
+	if (!oldobj) { // in case we don't find the key
+		log_debug("1\n");
+		newobj = cJSON_AddObjectToObject(cfg, name);
+		if (!newobj) {
+			goto end;
 		}
-		if (!add_comment(cfg, name, comment)) {
-			return (vector_copy(default_val));
+		log_debug("adding info: '%s'\n", finalcomment);
+		if (!cJSON_AddStringToObject(newobj, "info", finalcomment)) {
+			goto end;
 		}
-		/* add the vect to the obj */
-		cJSON *new_array = cJSON_AddArrayToObject(cfg, name);
-		if (new_array) {
-			for (int i = 0; i < vector_size(default_val); ++i) {
-				
+		cJSON *arr = cJSON_CreateIntArray(default_val, (int)vector_size(default_val));
+		if (!arr) {
+			goto end;
+		}
+		if (!cJSON_AddItemToObject(newobj, "value", arr)) {
+			goto end;
+		}
+	} else { // in case we find it, we still update the comment
+		log_debug("2\n");
+		infoobj = cJSON_CreateString(finalcomment);
+		if (infoobj) {
+			if (!cJSON_ReplaceItemInObjectCaseSensitive(oldobj, "info", infoobj)) {
+				cJSON_Delete(infoobj);
+				goto end;
 			}
 		}
-		/*if (!cJSON_AddStringToObject(cfg, name, default_val)) {
-			return (vector_copy(default_val));
-		}*/
-
-
-
-		return (vector_copy(default_val));
+		cJSON *valobj = cJSON_GetObjectItemCaseSensitive(oldobj, "value");
+		if (!valobj || !cJSON_IsArray(valobj)) {
+			goto end;
+		}
+		free(finalcomment);
+		return (jsonTo_vec_int(valobj));
 	}
-	cJSON_Delete(nameval);
-	add_comment(cfg, name, comment); //updating comment in case it changed in the code
-	//char *res = strdup(objval->valuestring);
-	cJSON_Delete(objval);
-	return (NULL);
+	end:
+	if (finalcomment) {
+		free(finalcomment);
+	}
+	return (vector_copy(default_val));
 }
 
 

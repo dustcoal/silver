@@ -40,6 +40,7 @@ FILE(GLOB COMMON_SOURCE_FILES
     src/common/util/vec_util.c
     src/common/util/file_util.c
     src/common/util/ftoa.c
+    src/common/util/json_util.c
 )
 
 FILE(GLOB SERVER_SOURCE_FILES

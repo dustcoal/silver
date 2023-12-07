@@ -14,6 +14,7 @@
 /* own */
 #include "common/util/pointer_util.h"
 #include "common/util/min_max.h"
+#include "common/util/json_util.h"
 
 typedef cJSON jsonConfig;
 typedef cJSON configSection;

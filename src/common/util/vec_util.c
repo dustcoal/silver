@@ -65,3 +65,33 @@ char *vec_str_join_sep(vec_str vec, const char *sep) {
 	res[res_size + sep_total_len] = '\0';
 	return (res);
 }
+
+vec_int intarr_to_vec(const int *arr, size_t size) {
+	vec_int res = vector_create();
+	if (!res) {
+		return (NULL);
+	}
+	for (int i = 0; i < size; ++i) {
+		if (!vector_add(&res, arr[i])) {
+			vector_free(res);
+			return (NULL);
+		}
+	}
+	return (res);
+}
+
+char *vec_int_to_str(vec_int vec) {
+	vec_str tmp = vector_create();
+	if (!tmp) {
+		return (NULL);
+	}
+	for (int i = 0; i < vector_size(vec); ++i) {
+		if (!vector_add(&tmp, itoa(vec[i], 10))) {
+			free_vec_str_allocated(tmp);
+			return (NULL);
+		}
+	}
+	char *res = vec_str_join_sep(tmp, ", ");
+	free_vec_str_allocated(tmp);
+	return (res);
+}
