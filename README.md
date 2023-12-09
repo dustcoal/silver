@@ -1,5 +1,11 @@
 ## Craft
 
+### a couple quick and dirty notes for this fork:
+* to rebuild completely, for example to change sanitizer flag, wipe everything that is not on git using `git_clean.sh`
+* to build on \*nix, use `build.sh`
+* use `launch_server.sh` or `launcg_client.sh` to run whichever once compiled
+* for now the c server is a stub, the original server is in python
+
 Minecraft clone for Windows, Mac OS X and Linux. Just a few thousand lines of C using modern OpenGL (shaders). Online multiplayer support is included using a Python-based server.
 
 http://www.michaelfogleman.com/craft/

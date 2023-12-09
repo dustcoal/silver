@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(craft)
 
+SET(ENV{LSAN_OPTIONS} "suppressions=sup.txt")
 if (LINUX)
-    #add_compile_options(-fsanitize=leak)
-    #add_link_options(-fsanitize=leak)
+    add_compile_options(-fsanitize=leak)
+    add_link_options(-fsanitize=leak)
     ##add_compile_options(-fsanitize=thread)
     ##add_link_options(-fsanitize=thread)
     add_compile_options(-ggdb)

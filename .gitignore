@@ -40,3 +40,4 @@ deps/glfw/src/glfw3.lib
 server.lib
 deps/qoi/build/
 *.a
+cmake_build_files/

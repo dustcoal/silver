@@ -24,7 +24,9 @@
 #include "client/world_interact.h"
 #include "common/data_structures.h"
 
-//#include "client/util/shutdown.h"
+#include "client/util/shutdown.h"
+#include "log.h"
+#include "common/common.h"
 
 static Model model;
 /*static*/ Model *g = &model;
@@ -1639,9 +1641,9 @@ void errorCallback(int error, const char* description)
 
 //#include "log.h"
 int main(int argc, char **argv) {
-	//logging_init(stdout);
-	//common_init(CLIENT);
-    //log_info("Starting\n");
+	logging_init(stdout);
+	common_init(CLIENT);
+    log_info("Starting\n");
 
     // INITIALIZATION //
     curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -1651,7 +1653,7 @@ int main(int argc, char **argv) {
 
 	mtx_init(&g->db_mtx, mtx_plain);
 
-	//shutdown(1, "lololol");
+	shutdown(1, "lololol");
 
     glfwSetErrorCallback(errorCallback);
     // WINDOW INITIALIZATION //
@@ -2053,5 +2055,5 @@ int main(int argc, char **argv) {
     printf("terminating glfw...\n");
     glfwTerminate();
     curl_global_cleanup();
-    return 0;
+    return (0);
 }
