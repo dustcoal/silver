@@ -7,7 +7,7 @@
 #include "noise.h"
 
 #include "client.h"
-#include "config.h"
+#include "define_config.h"
 #include "cube.h"
 #include "item.h"
 #include "map.h"

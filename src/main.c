@@ -11,7 +11,7 @@
 
 #include "auth.h"
 #include "client.h"
-#include "config.h"
+#include "define_config.h"
 #include "cube.h"
 #include "db.h"
 #include "item.h"
@@ -23,7 +23,8 @@
 #include "client/network.h"
 #include "client/world_interact.h"
 #include "common/data_structures.h"
-#include "common/model.h"
+
+//#include "client/util/shutdown.h"
 
 static Model model;
 /*static*/ Model *g = &model;
@@ -1636,13 +1637,21 @@ void errorCallback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
+//#include "log.h"
 int main(int argc, char **argv) {
-    printf("starting\n");
+	//logging_init(stdout);
+	//common_init(CLIENT);
+    //log_info("Starting\n");
+
     // INITIALIZATION //
     curl_global_init(CURL_GLOBAL_DEFAULT);
     printf("initted curl\n");
     srand(time(NULL));
     rand();
+
+	mtx_init(&g->db_mtx, mtx_plain);
+
+	//shutdown(1, "lololol");
 
     glfwSetErrorCallback(errorCallback);
     // WINDOW INITIALIZATION //
@@ -2030,9 +2039,11 @@ int main(int argc, char **argv) {
 
         printf("shutting down\n");
         // SHUTDOWN //
+		//mtx_lock(&g->db_mtx);
         db_save_state(s->x, s->y, s->z, s->rx, s->ry);
+		db_disable();
         db_close();
-        db_disable();
+		//mtx_unlock(&g->db_mtx);
         client_stop();
         client_disable();
         del_buffer(sky_buffer);

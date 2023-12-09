@@ -1,4 +1,4 @@
-#include "headers/config.h"
+#include "headers/define_config.h"
 #include "noise.h"
 #include "headers/world.h"
 

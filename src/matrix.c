@@ -1,5 +1,5 @@
 #include <math.h>
-#include "headers/config.h"
+#include "headers/define_config.h"
 #include "headers/matrix.h"
 #include "headers/util.h"
 

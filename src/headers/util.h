@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "cube.h"
-#include "config.h"
+#include "define_config.h"
 
 #define PI 3.14159265359
 #define DEGREES(radians) ((radians) * 180 / PI)

@@ -3,8 +3,10 @@ cmake_minimum_required(VERSION 3.10)
 project(craft)
 
 if (LINUX)
-    add_compile_options(-fsanitize=address,leak)
-    add_link_options(-fsanitize=address,leak)
+    #add_compile_options(-fsanitize=leak)
+    #add_link_options(-fsanitize=leak)
+    ##add_compile_options(-fsanitize=thread)
+    ##add_link_options(-fsanitize=thread)
     add_compile_options(-ggdb)
     add_link_options(-ggdb)
 endif()
@@ -46,12 +48,16 @@ FILE(GLOB COMMON_SOURCE_FILES
 FILE(GLOB SERVER_SOURCE_FILES
     src/server/server.c
     src/server/config_main.c
+
+    src/server/util/shutdown.c
 )
 
 FILE(GLOB CLIENT_SOURCE_FILES
     src/client/network.c
     src/client/world_interact.c
     src/client/chat.c
+
+    src/client/util/shutdown.c
 )
 
 FILE(GLOB COMMON_DEPS
@@ -70,6 +76,7 @@ add_executable(
 
     ${SOURCE_FILES}
     ${CLIENT_SOURCE_FILES}
+    ${COMMON_SOURCE_FILES}
     ${COMMON_DEPS}
     deps/glew/src/glew.c
 )

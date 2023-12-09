@@ -4,6 +4,7 @@
 
 #include "map.h"
 #include "sign.h"
+#include "define_config.h"
 
 #ifndef CRAFT_DATA_STRUCTURES_H
 #define CRAFT_DATA_STRUCTURES_H
@@ -106,6 +107,7 @@ typedef struct {
 typedef struct {
 	GLFWwindow *window;
 	Worker workers[WORKERS];
+	mtx_t db_mtx;
 	Chunk chunks[MAX_CHUNKS];
 	int chunk_count;
 	int create_radius;

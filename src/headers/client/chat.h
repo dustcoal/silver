@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "config.h"
+#include "define_config.h"
 #include "common/data_structures.h"
 #include "common/model.h"
 

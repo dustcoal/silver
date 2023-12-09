@@ -1,5 +1,5 @@
-#ifndef _config_h_
-#define _config_h_
+#ifndef _define_config_h_
+#define _define_config_h_
 
 // app parameters
 #define DEBUG 0
