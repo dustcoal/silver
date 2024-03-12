@@ -112,6 +112,7 @@ void save_conf(jsonConfig *cfg) {
 	free(text);
 }
 
+/* todo: move this elsewhere */
 void *populate_config_struct(jsonConfig *cfg) {
 	cJSON *ptr_json = cJSON_GetObjectItemCaseSensitive(cfg, "populate_func_ptr");
 	if (!ptr_json) {
@@ -129,6 +130,23 @@ void *populate_config_struct(jsonConfig *cfg) {
 	void *res = populate_func(cfg);
 	cJSON_Delete(ptr_json);
 	return (res);
+}
+
+static int check_int(int val, int min, int max) {
+	return (val <= max && val >= min);
+}
+
+static int check_float(float val, float min, float max) {
+	return (val <= max && val >= min);
+}
+
+static int check_int_vec(vec_int val, int min, int max) {
+	for (int i = 0; i < vector_size(val); ++i) {
+		if (!check_int(val[i], min, max)) {
+			return (0);
+		}
+	}
+	return (1);
 }
 
 configSection *get_section(configSection *target_section, char *name, char *displayname, char *description) {
@@ -168,255 +186,8 @@ configSection *get_section(configSection *target_section, char *name, char *disp
 	}
 }
 
-static void get_comment_name(char buf[100], const char *prop_name) {
-	static const char *prefix = "#comment [";
-	static const int prefixlen = strlen("#comment [");
-	memcpy(buf, prefix, prefixlen);
-	unsigned long copy_len = ulmin(50, strlen(prop_name));
-	memcpy(buf + prefixlen, prop_name, copy_len);
-	buf[prefixlen + copy_len] = ']';
-	buf[prefixlen + copy_len + 1] = 0;
-	buf[999] = 0;
-}
-
-static int add_comment(jsonConfig *cfg, char *prop_name, char *comment) {
-	char comment_name[1000];
-	get_comment_name(comment_name, prop_name);
-	cJSON_DeleteItemFromObjectCaseSensitive(cfg, comment_name);
-	if (!cJSON_AddStringToObject(cfg, comment_name, comment)) {
-		return (0);
-	}
-	return (1);
-}
-
-static char *get_final_comment_int(char *comment, int default_val, int min_val, int max_val) {
-	char *res = NULL;
-	char *dv = itoa(default_val, 10);
-	char *miv = itoa(min_val, 10);
-	char *mav = itoa(max_val, 10);
-
-	if (!dv || !miv || !mav) {
-		goto end;
-	}
-
-	vec_str tmp = vector_create();
-	if (!tmp) {
-		goto end;
-	}
-	if(!vector_add(&tmp, "[Default value: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, dv)) {
-		goto end;
-	}
-	if(!vector_add(&tmp, ", min value: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, miv)) {
-		goto end;
-	}
-	if(!vector_add(&tmp, ", max value: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, mav)) {
-		goto end;
-	}
-	if(!vector_add(&tmp, "] Comment: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, comment)) {
-		goto end;
-	}
-	res = vec_str_join(tmp);
-
-	end:
-	if (tmp) {
-		vector_free(tmp);
-	}
-	if (dv) {
-		free(dv);
-	}
-	if (miv) {
-		free(miv);
-	}
-	if (mav) {
-		free(mav);
-	}
-	return (res);
-}
-
-static char *get_final_comment_float(char *comment, float default_val, float min_val, float max_val) {
-	char *res = NULL;
-	char *dv = ftoa(default_val, 5);
-	char *miv = ftoa(min_val, 5);
-	char *mav = ftoa(max_val, 5);
-
-	if (!dv || !miv || !mav) {
-		goto end;
-	}
-
-	vec_str tmp = vector_create();
-	if (!tmp) {
-		goto end;
-	}
-	if(!vector_add(&tmp, "[Default value: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, dv)) {
-		goto end;
-	}
-	if(!vector_add(&tmp, ", min value: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, miv)) {
-		goto end;
-	}
-	if(!vector_add(&tmp, ", max value: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, mav)) {
-		goto end;
-	}
-	if(!vector_add(&tmp, "] Comment: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, comment)) {
-		goto end;
-	}
-	res = vec_str_join(tmp);
-
-	end:
-	if (tmp) {
-		vector_free(tmp);
-	}
-	if (dv) {
-		free(dv);
-	}
-	if (miv) {
-		free(miv);
-	}
-	if (mav) {
-		free(mav);
-	}
-	return (res);
-}
-
-static char *get_final_comment_bool(char *comment, int default_val) {
-	char *res = NULL;
-
-	vec_str tmp = vector_create();
-	if (!tmp) {
-		goto end;
-	}
-	if(!vector_add(&tmp, "[Default value: ")) {
-		goto end;
-	}
-	if (default_val) {
-		if(!vector_add(&tmp, "true")) {
-			goto end;
-		}
-	} else {
-		if(!vector_add(&tmp, "false")) {
-			goto end;
-		}
-	}
-	if(!vector_add(&tmp, "] Comment: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, comment)) {
-		goto end;
-	}
-	res = vec_str_join(tmp);
-
-	end:
-	if (tmp) {
-		vector_free(tmp);
-	}
-	return (res);
-}
-
-static char *get_final_comment_str(char *comment, const char *default_val) {
-	char *res = NULL;
-
-	vec_str tmp = vector_create();
-	if (!tmp) {
-		goto end;
-	}
-	if(!vector_add(&tmp, "[Default value: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, (char *)default_val)) {
-		goto end;
-	}
-	if(!vector_add(&tmp, "] Comment: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, comment)) {
-		goto end;
-	}
-	res = vec_str_join(tmp);
-
-	end:
-	if (tmp) {
-		vector_free(tmp);
-	}
-	return (res);
-}
-
-static char *get_final_comment_intvec(char *comment, vec_int default_val) {
-	char *res = NULL;
-	vec_str tmp = NULL;
-	vec_str tmp2 = NULL;
-	char *tmp4 = NULL;
-
-	/* this tmp holds unallocated strings */
-	tmp = vector_create();
-	if (!tmp) {
-		goto end;
-	}
-	if(!vector_add(&tmp, "[Default value: [")) {
-		goto end;
-	}
-
-	/* this tmp holds allocated itoa's */
-	tmp2 = vector_create();
-	if (!tmp2) {
-		goto end;
-	}
-	for (int i = 0; i < vector_size(default_val); ++i) {
-		char *tmp3 = itoa(default_val[i], 10);
-		if (!tmp3) {
-			goto end;
-		}
-		vector_add(&tmp2, tmp3);
-	}
-	tmp4 = vec_str_join_sep(tmp2, ", ");
-	if (!tmp4) {
-		goto end;
-	}
-	if(!vector_add(&tmp, tmp4)) {
-		goto end;
-	}
-
-	if(!vector_add(&tmp, "]] Comment: ")) {
-		goto end;
-	}
-	if(!vector_add(&tmp, comment)) {
-		goto end;
-	}
-	res = vec_str_join(tmp);
-
-	end:
-	if (tmp) {
-		vector_free(tmp);
-	}
-	if (tmp2) {
-		free_vec_str_allocated(tmp2);
-	}
-	if (tmp4) {
-		free(tmp4);
-	}
-	return (res);
+static char *get_comment(const char *comment) {
+	return (strjoin("Comment: ", comment));
 }
 
 int get_int_val(jsonConfig *cfg, char *name, char *comment, int default_val, int min_val, int max_val) {
@@ -425,14 +196,18 @@ int get_int_val(jsonConfig *cfg, char *name, char *comment, int default_val, int
 	cJSON *infoobj = NULL;
 	char *finalcomment = NULL;
 
-	finalcomment = get_final_comment_int(comment, default_val, min_val, max_val);
+	if (!check_int(default_val, min_val, max_val)) {
+		log_fatal("Default value for config element '%s' is out of allowd min-max range", name);
+		shutdown(1);
+	}
+
+	finalcomment = get_comment(comment);
 	if (!finalcomment) {
 		goto end;
 	}
 
 	oldobj = cJSON_GetObjectItemCaseSensitive(cfg, name);
 	if (!oldobj) { // in case we don't find the key
-		log_debug("1\n");
 		newobj = cJSON_AddObjectToObject(cfg, name);
 		if (!newobj) {
 			goto end;
@@ -446,7 +221,6 @@ int get_int_val(jsonConfig *cfg, char *name, char *comment, int default_val, int
 		}
 
 	} else { // in case we find it, we still update the comment
-		log_debug("2\n");
 		infoobj = cJSON_CreateString(finalcomment);
 		if (infoobj) {
 			if (!cJSON_ReplaceItemInObjectCaseSensitive(oldobj, "info", infoobj)) {
@@ -475,14 +249,18 @@ float get_float_val(jsonConfig *cfg, char *name, char *comment, float default_va
 	cJSON *infoobj = NULL;
 	char *finalcomment = NULL;
 
-	finalcomment = get_final_comment_float(comment, default_val, min_val, max_val);
+	if (!check_float(default_val, min_val, max_val)) {
+		log_fatal("Default value for config element '%s' is out of allowd min-max range", name);
+		shutdown(1);
+	}
+
+	finalcomment = get_comment(comment);
 	if (!finalcomment) {
 		goto end;
 	}
 
 	oldobj = cJSON_GetObjectItemCaseSensitive(cfg, name);
 	if (!oldobj) { // in case we don't find the key
-		log_debug("1\n");
 		newobj = cJSON_AddObjectToObject(cfg, name);
 		if (!newobj) {
 			goto end;
@@ -495,7 +273,6 @@ float get_float_val(jsonConfig *cfg, char *name, char *comment, float default_va
 			goto end;
 		}
 	} else { // in case we find it, we still update the comment
-		log_debug("2\n");
 		infoobj = cJSON_CreateString(finalcomment);
 		if (infoobj) {
 			if (!cJSON_ReplaceItemInObjectCaseSensitive(oldobj, "info", infoobj)) {
@@ -523,14 +300,13 @@ int get_bool_val(jsonConfig *cfg, char *name, char *comment, int default_val) {
 	cJSON *infoobj = NULL;
 	char *finalcomment = NULL;
 
-	finalcomment = get_final_comment_bool(comment, default_val);
+	finalcomment = get_comment(comment);
 	if (!finalcomment) {
 		goto end;
 	}
 
 	oldobj = cJSON_GetObjectItemCaseSensitive(cfg, name);
 	if (!oldobj) { // in case we don't find the key
-		log_debug("1\n");
 		newobj = cJSON_AddObjectToObject(cfg, name);
 		if (!newobj) {
 			goto end;
@@ -543,7 +319,6 @@ int get_bool_val(jsonConfig *cfg, char *name, char *comment, int default_val) {
 			goto end;
 		}
 	} else { // in case we find it, we still update the comment
-		log_debug("2\n");
 		infoobj = cJSON_CreateString(finalcomment);
 		if (infoobj) {
 			if (!cJSON_ReplaceItemInObjectCaseSensitive(oldobj, "info", infoobj)) {
@@ -571,14 +346,13 @@ char *get_string_val(jsonConfig *cfg, char *name, char *comment, const char *def
 	cJSON *infoobj = NULL;
 	char *finalcomment = NULL;
 
-	finalcomment = get_final_comment_str(comment, default_val);
+	finalcomment = get_comment(comment);
 	if (!finalcomment) {
 		goto end;
 	}
 
 	oldobj = cJSON_GetObjectItemCaseSensitive(cfg, name);
 	if (!oldobj) { // in case we don't find the key
-		log_debug("1\n");
 		newobj = cJSON_AddObjectToObject(cfg, name);
 		if (!newobj) {
 			goto end;
@@ -591,7 +365,6 @@ char *get_string_val(jsonConfig *cfg, char *name, char *comment, const char *def
 			goto end;
 		}
 	} else { // in case we find it, we still update the comment
-		log_debug("2\n");
 		infoobj = cJSON_CreateString(finalcomment);
 		if (infoobj) {
 			if (!cJSON_ReplaceItemInObjectCaseSensitive(oldobj, "info", infoobj)) {
@@ -613,56 +386,87 @@ char *get_string_val(jsonConfig *cfg, char *name, char *comment, const char *def
 	return (strdup(default_val));
 }
 
-vec_int get_int_vec(jsonConfig *cfg, char *name, char *comment, int *default_val) {
+vec_int get_int_vec(jsonConfig *cfg, char *name, char *comment, int *default_val, int min, int max) {
 	cJSON *newobj = NULL;
 	cJSON *oldobj = NULL;
-	cJSON *infoobj = NULL;
-	char *finalcomment = NULL;
 
-	finalcomment = get_final_comment_intvec(comment, default_val);
-	if (!finalcomment) {
-		goto end;
+	if (!check_int_vec(default_val, min, max)) {
+		log_debug("hmmmm %s", name);
+		log_fatal("Default value for config element '%s' is out of allowd min-max range", name, name);
+		shutdown(1);
 	}
 
 	oldobj = cJSON_GetObjectItemCaseSensitive(cfg, name);
 	if (!oldobj) { // in case we don't find the key
-		log_debug("1\n");
 		newobj = cJSON_AddObjectToObject(cfg, name);
 		if (!newobj) {
 			goto end;
 		}
-		log_debug("adding info: '%s'\n", finalcomment);
-		if (!cJSON_AddStringToObject(newobj, "info", finalcomment)) {
-			goto end;
-		}
+		cJSON_AddStringToObject(newobj, "comment", comment);
 		cJSON *arr = cJSON_CreateIntArray(default_val, (int)vector_size(default_val));
 		if (!arr) {
 			goto end;
 		}
-		if (!cJSON_AddItemToObject(newobj, "value", arr)) {
+		cJSON_AddItemToObject(newobj, "default_value", arr);
+		cJSON_AddNumberToObject(newobj, "min", min);
+		cJSON_AddNumberToObject(newobj, "max", max);
+		cJSON *arr_ = cJSON_CreateIntArray(default_val, (int)vector_size(default_val));
+		if (!arr_) {
 			goto end;
 		}
-	} else { // in case we find it, we still update the comment
-		log_debug("2\n");
-		infoobj = cJSON_CreateString(finalcomment);
-		if (infoobj) {
-			if (!cJSON_ReplaceItemInObjectCaseSensitive(oldobj, "info", infoobj)) {
-				cJSON_Delete(infoobj);
+		cJSON_AddItemToObject(newobj, "value", arr_);
+	} else { // in case we find it, we still update the comment, default_val, min, max
+		/* updating comment */
+		cJSON *commobj = cJSON_GetObjectItemCaseSensitive(oldobj, "comment");
+		if (commobj && cJSON_IsString(commobj)) {
+			cJSON_SetValuestring(commobj, comment);
+		} else {
+			cJSON_AddStringToObject(oldobj, "comment", comment);
+		}
+
+		/* updating default_value */
+		cJSON *def_val_obj = cJSON_GetObjectItemCaseSensitive(oldobj, "default_value");
+		if (def_val_obj && cJSON_IsArray(def_val_obj)) {
+			cJSON *arr = cJSON_CreateIntArray(default_val, (int)vector_size(default_val));
+			if (!arr) {
 				goto end;
 			}
+			if (!cJSON_ReplaceItemInObjectCaseSensitive(oldobj, "default_value", arr)) {
+				cJSON_Delete(arr);
+			}
+		} else {
+			cJSON *arr = cJSON_CreateIntArray(default_val, (int)vector_size(default_val));
+			if (!arr) {
+				goto end;
+			}
+			if (!cJSON_AddItemToObject(oldobj, "default_value", arr)) {
+				cJSON_Delete(arr);
+			}
 		}
+
+		/* updating min */
+		cJSON *minobj = cJSON_GetObjectItemCaseSensitive(oldobj, "min");
+		if (minobj && cJSON_IsNumber(minobj)) {
+			cJSON_SetNumberValue(minobj, min);
+		} else {
+			cJSON_AddNumberToObject(oldobj, "min", min);
+		}
+
+		/* updating max */
+		cJSON *maxobj = cJSON_GetObjectItemCaseSensitive(oldobj, "max");
+		if (maxobj && cJSON_IsNumber(maxobj)) {
+			cJSON_SetNumberValue(maxobj, max);
+		} else {
+			cJSON_AddNumberToObject(oldobj, "max", max);
+		}
+
+		/* returning value */
 		cJSON *valobj = cJSON_GetObjectItemCaseSensitive(oldobj, "value");
 		if (!valobj || !cJSON_IsArray(valobj)) {
 			goto end;
 		}
-		free(finalcomment);
 		return (jsonTo_vec_int(valobj));
 	}
 	end:
-	if (finalcomment) {
-		free(finalcomment);
-	}
 	return (vector_copy(default_val));
 }
-
-

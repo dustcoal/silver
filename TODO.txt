@@ -11,7 +11,7 @@
 * find some nice solution for gui. I feel like it's either full spartan à la minecraft or something html/css shit (https://mikke89.github.io/RmlUiDoc, https://github.com/litehtml/litehtml)
 * tick any visited sleeping chunks with entities inside periodically. make the tick speed faster there so they catch up. simplify whatever possible (e.g. mob behavior/movement)
 * some smart way of implementing cubic chunks. periodical chunk wakes should propagate lighting and maybe a fake ceiling?? there should be some heuristics to determine when the player falls to load more chunks below at a time
-* prints should probably be protected by a mutex
+* prints should probably be protected by a mutex (logs are now, it should be sufficient)
 * list of potentially useful pull requests to log.c:
     * https://github.com/rxi/log.c/pull/27/files
     * https://github.com/rxi/log.c/pull/34/files
@@ -22,19 +22,20 @@
 * list of future libs to include:
     * file dialog: https://github.com/rxi/sfd
     * microui: https://github.com/rxi/microui (web demo: https://floooh.github.io/sokol-html5/sgl-microui-sapp.html)
-    * http server: https://github.com/rxi/sandbird
+    * http server: https://github.com/rxi/sandbird # tbh nah, the auth server will be its own thing (in python lol), and dedicated server auth will be over protobuf
     * uuid 4: https://github.com/rxi/uuid4
     * vector: https://github.com/rxi/vec  or  https://github.com/eteran/c-vector (actively maintained)
     * hashmap: https://github.com/rxi/map or https://github.com/Mashpoe/c-hashmap
     * pango or harfbuzz for glyphs
     * maybe gio (gnome i/o) for files
+    * protobuf for networking: https://github.com/protobuf-c/protobuf-c
 
 * lib maybeboard
     * subprocesses: https://github.com/sheredom/subprocess.h
 
 
 * opt
-    * tick different things at different rates?
+    * tick different things at different rates? Heard might be aids to sync but tbh idk
     * discrete subsystems (a subsystem is notified only if an event concerns it)
 
 

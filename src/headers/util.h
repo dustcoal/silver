@@ -3,6 +3,8 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "log.h"
+
 #include "cube.h"
 #include "define_config.h"
 

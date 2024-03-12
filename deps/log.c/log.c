@@ -55,6 +55,7 @@
 
 int	term_has_color = 0;
 FILE *console_file = NULL; //stderr or stdout
+int logging_debug = 0;
 
 typedef struct {
   log_LogFn fn;
@@ -70,11 +71,12 @@ static struct {
   Callback callbacks[MAX_CALLBACKS];
 } L;
 
-int logging_init(FILE *console_file_) {
+int logging_init(FILE *console_file_, int is_debug) {
 #ifdef __linux__
 	term_has_color = unix_term_has_color();
 #endif
 	console_file = console_file_;
+	logging_debug = is_debug;
 	return (1);
 }
 
@@ -255,6 +257,9 @@ static void init_event(log_Event *ev, void *udata) {
 
 
 void log_log(int level, const char *file, int line, const char *fmt, ...) {
+	if (level == LOG_DEBUG && !logging_debug) {
+		return ;
+	}
   log_Event ev = {
     .fmt   = fmt,
     .file  = file,

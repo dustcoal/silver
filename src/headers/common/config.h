@@ -15,6 +15,8 @@
 #include "common/util/pointer_util.h"
 #include "common/util/min_max.h"
 #include "common/util/json_util.h"
+#include "common/util/shutdown.h"
+#include "common/util/string_util.h"
 
 typedef cJSON jsonConfig;
 typedef cJSON configSection;
@@ -38,6 +40,6 @@ int get_int_val(jsonConfig *cfg, char *name, char *comment, int default_val, int
 float get_float_val(jsonConfig *cfg, char *name, char *comment, float default_val, float min_val, float max_val);
 int get_bool_val(jsonConfig *cfg, char *name, char *comment, int default_val);
 char *get_string_val(jsonConfig *cfg, char *name, char *comment, const char *default_val);
-vec_int get_int_vec(jsonConfig *cfg, char *name, char *comment, int *default_val);
+vec_int get_int_vec(jsonConfig *cfg, char *name, char *comment, int *default_val, int min, int max);
 
 #endif

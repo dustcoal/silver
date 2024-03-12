@@ -2,7 +2,9 @@
 #define _define_config_h_
 
 // app parameters
+#ifndef DEBUG
 #define DEBUG 0
+#endif
 #define FULLSCREEN 0
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -13,6 +15,7 @@
 #define USE_CACHE 1
 #define DAY_LENGTH 600
 #define INVERT_MOUSE 0
+#define WINDOW_NAME "codenamesilverfish"
 
 // rendering options
 #define SHOW_LIGHTS 1

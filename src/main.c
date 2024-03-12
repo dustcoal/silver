@@ -24,7 +24,6 @@
 #include "client/world_interact.h"
 #include "common/data_structures.h"
 
-#include "client/util/shutdown.h"
 #include "log.h"
 #include "common/common.h"
 
@@ -1429,7 +1428,7 @@ void on_char(GLFWwindow *window, unsigned int u) {
     if (g->typing) {
         if (u >= 32 && u < 128) {
             char c = (char)u;
-            int n = strlen(g->typing_buffer);
+            int n = (int)strlen(g->typing_buffer);
             if (n < MAX_TEXT_LENGTH - 1) {
                 g->typing_buffer[n] = c;
                 g->typing_buffer[n + 1] = '\0';
@@ -1519,7 +1518,7 @@ void create_window() {
         window_height = modes[mode_count - 1].height;
     }
     g->window = glfwCreateWindow(
-        window_width, window_height, "Craft", monitor, NULL);
+        window_width, window_height, WINDOW_NAME, monitor, NULL);
 }
 
 void handle_mouse_input() {
@@ -1636,35 +1635,32 @@ void reset_model() {
 
 void errorCallback(int error, const char* description)
 {
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+    log_error("GLFW Error %d: %s", error, description);
 }
 
-//#include "log.h"
 int main(int argc, char **argv) {
-	logging_init(stdout);
 	common_init(CLIENT);
-    log_info("Starting\n");
+	printf("debug: %d\n", DEBUG_MODE);
+    log_info("Starting");
 
     // INITIALIZATION //
     curl_global_init(CURL_GLOBAL_DEFAULT);
-    printf("initted curl\n");
+    log_debug("Initialized curl");
     srand(time(NULL));
     rand();
 
 	mtx_init(&g->db_mtx, mtx_plain);
-
-	shutdown(1, "lololol");
 
     glfwSetErrorCallback(errorCallback);
     // WINDOW INITIALIZATION //
     if (!glfwInit()) {
         return -1;
     }
-    printf("initted glfw\n");
+    log_debug("Initialized glfw");
     create_window();
     if (!g->window) {
         glfwTerminate();
-        printf("couldn't open window\n");
+        log_fatal("Could not open window");
         return -1;
     }
 
@@ -1677,7 +1673,7 @@ int main(int argc, char **argv) {
     glfwSetScrollCallback(g->window, on_scroll);
 
     if (glewInit() != GLEW_OK) {
-        printf("couldn't init glew\n");
+        log_fatal("Could not init glew");
         return -1;
     }
 
@@ -1804,7 +1800,7 @@ int main(int argc, char **argv) {
         if (g->mode == MODE_OFFLINE || USE_CACHE) {
             db_enable();
             if (db_init(g->db_path)) {
-                printf("couldnt init db\n");
+                log_fatal("Could not init db");
                 return -1;
             }
             if (g->mode == MODE_ONLINE) {
@@ -2022,13 +2018,13 @@ int main(int argc, char **argv) {
             glfwSwapBuffers(g->window);
             glfwPollEvents();
             if (glfwWindowShouldClose(g->window)) {
-                printf("should close window, closing...\n");
+                log_debug("Closing window");
                 running = 0;
                 break;
             }
             if (g->mode_changed) {
                 g->mode_changed = 0;
-                printf("g mode changed, closing...\n");
+                log_debug("g mode changed, closing...");
                 break;
             }
 
@@ -2039,12 +2035,13 @@ int main(int argc, char **argv) {
 
         }
 
-        printf("shutting down\n");
+        log_info("Shutting down");
         // SHUTDOWN //
 		//mtx_lock(&g->db_mtx);
         db_save_state(s->x, s->y, s->z, s->rx, s->ry);
 		db_disable();
         db_close();
+		mtx_destroy(&g->db_mtx);
 		//mtx_unlock(&g->db_mtx);
         client_stop();
         client_disable();
@@ -2052,7 +2049,7 @@ int main(int argc, char **argv) {
         delete_all_chunks();
         delete_all_players();
     }
-    printf("terminating glfw...\n");
+    log_debug("Terminating glfw");
     glfwTerminate();
     curl_global_cleanup();
     return (0);

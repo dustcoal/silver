@@ -4,8 +4,8 @@ project(craft)
 
 SET(ENV{LSAN_OPTIONS} "suppressions=sup.txt")
 if (LINUX)
-    add_compile_options(-fsanitize=leak)
-    add_link_options(-fsanitize=leak)
+    add_compile_options(-fsanitize=leak,address)
+    add_link_options(-fsanitize=leak,address)
     ##add_compile_options(-fsanitize=thread)
     ##add_link_options(-fsanitize=thread)
     add_compile_options(-ggdb)
@@ -44,6 +44,7 @@ FILE(GLOB COMMON_SOURCE_FILES
     src/common/util/file_util.c
     src/common/util/ftoa.c
     src/common/util/json_util.c
+    src/common/util/string_util.c
 )
 
 FILE(GLOB SERVER_SOURCE_FILES

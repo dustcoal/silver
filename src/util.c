@@ -153,7 +153,7 @@ void load_png_texture(const char *file_name) {
     unsigned int width, height;
     error = lodepng_decode32_file(&data, &width, &height, file_name);
     if (error) {
-        fprintf(stderr, "load_png_texture %s failed, error %u: %s\n", file_name, error, lodepng_error_text(error));
+        log_fatal("load_png_texture %s failed, error %u: %s\n", file_name, error, lodepng_error_text(error));
         exit(1);
     }
     flip_image_vertical(data, width, height);

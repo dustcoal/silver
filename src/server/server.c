@@ -22,26 +22,27 @@ int main(int argc, char *argv[]) {
 	(void) argc;
 	(void) argv;
 
-	logging_init(stdout);
 	common_init(SERVER);
 
-	log_error("This is a sample error\n");
-	log_warn("This is a sample warning\n");
+	if(DEBUG_MODE) {
+		log_error("This is a sample error");
+		log_warn("This is a sample warning");
+	}
 
 	/* Testing cwalk */
 	const char *basename;
 	size_t length;
 	cwk_path_get_basename("/my/sneed.txt", &basename, &length);
-	log_debug("filename of /my/path.txt is %s and its length is %zu\n", basename, length);
+	log_debug("filename of /my/path.txt is %s and its length is %zu", basename, length);
 	/* End testing cwalk */
 
 	/* Testing qoi */
 	QoiImage *img = read_qoi_image("textures/sneed.qoi");
 	if (img) {
-		log_debug("successfully read test qoi image - width: %d, height: %d\n", img->desc->width, img->desc->height);
+		log_debug("successfully read test qoi image - width: %d, height: %d", img->desc->width, img->desc->height);
 		free_QoiImage(img);
 	} else {
-		log_debug("failed to read test qoi image\n");
+		log_debug("failed to read test qoi image");
 	}
 	/* End testing qoi */
 
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]) {
 	int a = 42;
 	char *ptr = ptr_to_str(&a);
 	int b = *(int *)str_to_ptr(ptr);
-	log_debug("b: %d\n", b);
+	log_debug("b: %d", b);
 	free(ptr);
 	/* endtesting ptr */
 
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]) {
 
 			int _[4] = {1, -2, 3, -69};
 			vec_int default_vec = intarr_to_vec(_, 4);
-			vec_int le_vec_int = get_int_vec(section1, "le_vec_int", "this is an int array (vector) (real)", default_vec);
+			vec_int le_vec_int = get_int_vec(section1, "le_vec_int", "this is an int array (vector) (real)", default_vec, -INT_MAX, INT_MAX);
 			vector_free(default_vec);
 			char *vec_int_charred = vec_int_to_str(le_vec_int);
 			printf("le_vec_int: [%s]\n", vec_int_charred);
@@ -85,9 +86,9 @@ int main(int argc, char *argv[]) {
 		cJSON_Delete(conf);
 	}
 
-	log_info("Server starting\n");
+	log_info("Server starting");
 	if (!read_server_config(&server_config)) {
-		log_fatal("Failed to parse config\n");
+		log_fatal("Failed to parse config");
 		return (1);
 	}
 	return (0);
