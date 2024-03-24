@@ -171,3 +171,9 @@ endif()
 if(WIN32)
     target_link_libraries(craft ${CURL_LIBRARIES} ws2_32.lib wldap32.lib advapi32.lib kernel32.lib comdlg32.lib crypt32.lib normaliz.lib glfw opengl32 ${GLFW_LIBRARIES})
 endif()
+
+file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+
+if(MINGW)
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/deps/curl_windows_mingw/libcurl-x64.dll DESTINATION ${CMAKE_BINARY_DIR})
+endif()

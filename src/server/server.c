@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	/* End testing cwalk */
 
 	/* Testing qoi */
-	QoiImage *img = read_qoi_image("textures/sneed.qoi");
+	QoiImage *img = read_qoi_image("assets/textures/sneed.qoi");
 	if (img) {
 		log_debug("successfully read test qoi image - width: %d, height: %d", img->desc->width, img->desc->height);
 		free_QoiImage(img);
