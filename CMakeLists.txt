@@ -73,6 +73,11 @@ FILE(GLOB COMMON_DEPS
     deps/c-vector/vec.c
 )
 
+# This needs to happen before add_executable or add_library
+if(MINGW)
+    link_directories(${CMAKE_CURRENT_LIST_DIR}/deps/curl_windows_mingw/lib)
+endif()
+
 add_executable(
     craft
 
@@ -125,21 +130,15 @@ target_link_libraries(craft cwalk m)
 target_link_libraries(server cwalk m)
 
 
-if(MINGW)
-    set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
-        "C:/Program Files/CURL/lib" "C:/Program Files (x86)/CURL/lib" "deps/curl_windows/lib")
-    set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}
-        "C:/Program Files/CURL/include" "C:/Program Files (x86)/CURL/include" "deps/curl_windows/include")
-endif()
-
 if(WIN32 AND NOT MINGW)
     set(CURL_INCLUDE_DIR "deps/curl_windows/include")
     set(CURL_LIBRARY "deps/curl_windows/lib/libcurl")
 endif()
 
 if(MINGW)
-    set(CURL_INCLUDE_DIR "deps/curl_windows/include")
-    #set(CURL_LIBRARY "deps/curl_windows/lib/libcurl.lib")
+    add_definitions(-DCURL_STATICLIB)
+    set(CURL_LIBRARY "${CMAKE_CURRENT_LIST_DIR}/deps/curl_windows_mingw/lib/libcurl.a")
+    set(CURL_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/deps/curl_windows_mingw/include")
 endif()
 
 find_package(CURL REQUIRED)
@@ -156,8 +155,16 @@ if(UNIX)
 endif()
 
 if(MINGW)
-    target_link_libraries(craft ${CURL_LIBRARIES}
-        ws2_32.lib wldap32.lib advapi32.lib kernel32.lib comdlg32.lib crypt32.lib normaliz.lib glfw opengl32
+    #target_link_libraries(craft ${CURL_LIBRARIES}
+    #    ws2_32.lib wldap32.lib advapi32.lib kernel32.lib comdlg32.lib crypt32.lib normaliz.lib glfw opengl32
+    #    ${GLFW_LIBRARIES})
+
+    target_link_libraries(craft
+
+        brotlicommon brotlidec crypto curl nghttp2 nghttp3 ngtcp2 ngtcp2_crypto_quictls psl ssh2 ssl z zstd
+
+        ws2_32 wldap32 advapi32 kernel32 comdlg32 crypt32 normaliz glfw opengl32
+
         ${GLFW_LIBRARIES})
 endif()
 

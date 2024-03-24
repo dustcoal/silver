@@ -86,7 +86,7 @@ char *vec_int_to_str(vec_int vec) {
 		return (NULL);
 	}
 	for (int i = 0; i < vector_size(vec); ++i) {
-		if (!vector_add(&tmp, itoa(vec[i], 10))) {
+		if (!vector_add(&tmp, itoa_own(vec[i], 10))) {
 			free_vec_str_allocated(tmp);
 			return (NULL);
 		}

@@ -23,7 +23,7 @@
 
 #define BUFSIZE (sizeof(long) * 8 + 1)
 
-char *ltoa(long N, int base)
+char *ltoa_own(long N, int base)
 {
 	register int i = 2;
 	long uarg;

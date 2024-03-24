@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-char *ulltoa(unsigned long long value, int radix) {
+char *ulltoa_own(unsigned long long value, int radix) {
 	char			*buf = malloc(64 + 1);
 	if (!buf) {
 		return (NULL);

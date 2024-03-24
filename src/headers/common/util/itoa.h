@@ -3,6 +3,6 @@
 
 #include "common/util/ltoa.h"
 
-char *itoa(int N, int base);
+char *itoa_own(int N, int base);
 
 #endif //CRAFT_ITOA_H

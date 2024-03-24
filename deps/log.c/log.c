@@ -244,13 +244,25 @@ int log_add_fp(FILE *fp, int level) {
 }
 
 
-static void init_event(log_Event *ev, void *udata) {
+/*static void init_event(log_Event *ev, void *udata) {
   if (!ev->time_initted) {
   	ev->time_initted = 1;
     time_t t = time(NULL);
     localtime_r(&t, &ev->time); // http://jianewyork.blogspot.com/2018/03/use-of-localtime-localtimer-and-their.html
 	//ev->time = *localtime(&t);
 	cwk_path_get_basename(ev->file, &ev->file, NULL);
+  }
+  ev->udata = udata;
+}*/
+
+static void init_event(log_Event *ev, void *udata) {
+
+  if (!ev->time_initted) {
+    ev->time_initted = 1;
+    time_t t = time(NULL);
+    // Use localtime_s on Windows
+    localtime_s(&ev->time, &t);
+    cwk_path_get_basename(ev->file, &ev->file, NULL);
   }
   ev->udata = udata;
 }
