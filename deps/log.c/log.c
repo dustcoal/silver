@@ -243,25 +243,15 @@ int log_add_fp(FILE *fp, int level) {
   return log_add_callback(file_callback, fp, level);
 }
 
-
-/*static void init_event(log_Event *ev, void *udata) {
-  if (!ev->time_initted) {
-  	ev->time_initted = 1;
-    time_t t = time(NULL);
-    localtime_r(&t, &ev->time); // http://jianewyork.blogspot.com/2018/03/use-of-localtime-localtimer-and-their.html
-	//ev->time = *localtime(&t);
-	cwk_path_get_basename(ev->file, &ev->file, NULL);
-  }
-  ev->udata = udata;
-}*/
-
 static void init_event(log_Event *ev, void *udata) {
-
   if (!ev->time_initted) {
     ev->time_initted = 1;
     time_t t = time(NULL);
-    // Use localtime_s on Windows
-    localtime_s(&ev->time, &t);
+    #ifdef WINDOWS
+        localtime_s(&ev->time, &t);
+    #else
+        localtime_r(&t, &ev->time); // http://jianewyork.blogspot.com/2018/03/use-of-localtime-localtimer-and-their.html
+    #endif
     cwk_path_get_basename(ev->file, &ev->file, NULL);
   }
   ev->udata = udata;
@@ -272,32 +262,32 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
 	if (level == LOG_DEBUG && !logging_debug) {
 		return ;
 	}
-  log_Event ev = {
-    .fmt   = fmt,
-    .file  = file,
-    .line  = line,
-    .level = level,
-    .time_initted = 0
-  };
+    log_Event ev = {
+        .fmt   = fmt,
+        .file  = file,
+        .line  = line,
+        .level = level,
+        .time_initted = 0
+    };
 
-  lock();
+    lock();
 
-  if (!L.quiet && level >= L.level) {
-    init_event(&ev, console_file);
-    va_start(ev.ap, fmt);
-    stdout_callback(&ev);
-    va_end(ev.ap);
-  }
-
-  for (int i = 0; i < MAX_CALLBACKS && L.callbacks[i].fn; i++) {
-    Callback *cb = &L.callbacks[i];
-    if (level >= cb->level) {
-      init_event(&ev, cb->udata);
-      va_start(ev.ap, fmt);
-      cb->fn(&ev);
-      va_end(ev.ap);
+    if (!L.quiet && level >= L.level) {
+        init_event(&ev, console_file);
+        va_start(ev.ap, fmt);
+        stdout_callback(&ev);
+        va_end(ev.ap);
     }
-  }
 
-  unlock();
+    for (int i = 0; i < MAX_CALLBACKS && L.callbacks[i].fn; i++) {
+        Callback *cb = &L.callbacks[i];
+        if (level >= cb->level) {
+            init_event(&ev, cb->udata);
+            va_start(ev.ap, fmt);
+            cb->fn(&ev);
+            va_end(ev.ap);
+        }
+    }
+
+    unlock();
 }
